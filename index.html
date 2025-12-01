@@ -9,29 +9,76 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Dancing+Script:wght@700&display=swap');
 
+        /* Global Reset for "No Blue Boxes" */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+            user-select: none;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0f0f0f;
+            background-color: #1a1a1a;
             height: 100vh;
             width: 100vw;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            user-select: none;
+            margin: 0;
         }
 
         /* Phone Frame */
         #phone-frame {
             width: 370px;
-            height: 780px;
+            height: 780px; /* Standard Height */
+            max-height: 95vh; /* Responsive for smaller screens */
             background: #000;
-            border-radius: 50px;
-            border: 10px solid #222;
+            border-radius: 55px;
+            border: 12px solid #222;
             position: relative;
-            overflow: hidden;
+            overflow: visible;
             box-shadow: 0 0 0 2px #444, 0 30px 60px -12px rgba(0, 0, 0, 0.7);
             transition: all 0.3s ease;
+            /* Ensure it is centered properly */
+            margin: auto; 
+        }
+
+        /* Side Buttons */
+        .side-btn {
+            position: absolute;
+            background: #222;
+            border-radius: 4px 0 0 4px;
+            left: -14px;
+            width: 4px;
+            z-index: 0;
+        }
+        .side-btn-right {
+            border-radius: 0 4px 4px 0;
+            left: auto;
+            right: -14px;
+        }
+
+        #btn-mute { top: 100px; height: 30px; }
+        #btn-vol-up { top: 150px; height: 60px; }
+        #btn-vol-down { top: 220px; height: 60px; }
+        #btn-power { 
+            top: 180px; 
+            height: 100px; 
+            background: #1a1a1a;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        #btn-power:active { transform: scaleX(0.8); }
+
+        /* Screen Container */
+        #screen-container {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 42px;
+            position: relative;
+            background: black;
         }
 
         /* Dynamic Island / Notch */
@@ -62,7 +109,6 @@
             gap: 5px;
         }
 
-        /* Animations for Notch */
         .notch-face-id { width: 140px !important; height: 140px !important; border-radius: 30px !important; }
         .notch-charging { width: 180px !important; height: 40px !important; }
 
@@ -71,12 +117,9 @@
             width: 100%;
             height: 100%;
             position: relative;
-            overflow: hidden;
-            border-radius: 40px;
             background-color: #000;
         }
         
-        /* Layered Backgrounds */
         #wallpaper-layer, #lock-wallpaper-layer {
             position: absolute;
             inset: 0;
@@ -86,21 +129,17 @@
             z-index: 0;
         }
         
-        /* Default Wallpapers */
         .bg-default-home { background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop'); }
         .bg-default-lock { background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000&auto=format&fit=crop'); }
 
-        /* Utility Classes */
         .hide { display: none !important; }
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         .pop-in { animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .slide-up { animation: slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
         .slide-down-out { animation: slideDownOut 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
         
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        @keyframes slideDownOut { from { transform: translateY(0); } to { transform: translateY(100%); } }
+        @keyframes slideDownOut { from { transform: translateY(0); } to { transform: translateY(-100%); opacity: 0; } } /* Adjusted to slide UP visually out of view */
 
         /* App Grid */
         .app-grid {
@@ -108,7 +147,7 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 1.5rem 0.5rem;
             padding: 2rem 1.2rem;
-            margin-top: 2rem; /* Increased top margin to avoid overlap */
+            margin-top: 2rem;
             z-index: 10;
             position: relative;
         }
@@ -136,7 +175,6 @@
             background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 50%);
             pointer-events: none;
         }
-
         .app-icon:active { transform: scale(0.92); }
 
         /* Status Bar */
@@ -183,19 +221,15 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            border-radius: 40px;
-            padding-top: 45px; /* Added padding to prevent notch overlap */
+            border-radius: 42px;
+            padding-top: 45px; /* Safe area for Notch */
         }
         
-        /* Dark Mode */
         .dark-mode .app-window { background: #000; color: white; }
         .dark-mode .bg-white { background-color: #1c1c1e !important; color: white; }
         .dark-mode .text-gray-800 { color: #fff !important; }
-        .dark-mode .bg-gray-50 { background-color: #000 !important; }
-        .dark-mode .border-b { border-color: #333 !important; }
-        .dark-mode input { background: #333; color: white; }
-
-        /* Calculator Specifics */
+        
+        /* Calculator */
         .calc-btn {
             height: 70px; width: 70px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
@@ -203,392 +237,451 @@
         }
         .calc-btn:active { filter: brightness(1.2); }
 
-        /* Control Center Slider */
+        /* Control Center */
         .cc-slider {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            position: absolute;
-            top: 0; left: 0;
-            z-index: 10;
+            -webkit-appearance: none; width: 100%; height: 100%;
+            background: transparent; position: absolute; top: 0; left: 0; z-index: 10;
         }
         .cc-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 0; height: 0; }
         
-        /* Glassmorphism */
-        .glass {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
         .glass-dark {
             background: rgba(30, 30, 30, 0.7);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Flashlight Overlay */
         #flashlight-overlay {
-            pointer-events: none;
-            opacity: 0;
-            background: white;
-            z-index: 100;
-            mix-blend-mode: overlay;
+            pointer-events: none; opacity: 0; background: white; z-index: 100; mix-blend-mode: overlay;
         }
         
-        /* Boot Screen */
         .font-cursive { font-family: 'Dancing Script', cursive; }
-        
-        #boot-screen {
-            pointer-events: all;
-            z-index: 1000;
+        #boot-screen { pointer-events: all; z-index: 1000; }
+        #power-off-ui { background: rgba(0,0,0,0.6); backdrop-filter: blur(30px); z-index: 2000; }
+        #black-screen { background: #000; z-index: 3000; }
+
+        /* Full Screen Photo Viewer */
+        #photo-viewer {
+            position: absolute;
+            inset: 0;
+            background: black;
+            z-index: 300;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
         }
+        #photo-viewer.active { opacity: 1; pointer-events: all; }
+        #photo-viewer img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+        /* Lock Screen Handle Animation Area */
+        #lock-handle-area {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 150px;
+            z-index: 50;
+            /* background: rgba(255,0,0,0.1); Debugging */
+            display: flex;
+            flex-col;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
     </style>
 </head>
 <body>
 
     <div id="phone-frame">
-        
-        <!-- Boot Screen -->
-        <div id="boot-screen" class="absolute inset-0 bg-black flex flex-col items-center justify-center text-white transition-opacity duration-1000">
-            <!-- Stage 1: Text Logo -->
-            <div id="boot-logo" class="text-3xl font-bold tracking-[0.2em] opacity-0 transition-opacity duration-1000">KANDAMAS</div>
-            
-            <!-- Stage 2: Hello Animation -->
-            <div id="boot-hello" class="text-5xl font-cursive opacity-0 absolute transition-opacity duration-1000 flex flex-col items-center gap-2">
-                <span>Hello</span>
-                <span class="text-2xl font-sans tracking-widest font-light">Kandamas</span>
-            </div>
-        </div>
+        <!-- Physical Buttons -->
+        <div id="btn-mute" class="side-btn"></div>
+        <div id="btn-vol-up" class="side-btn"></div>
+        <div id="btn-vol-down" class="side-btn"></div>
+        <div id="btn-power" class="side-btn side-btn-right" onmousedown="startPowerHold()" onmouseup="endPowerHold()" ontouchstart="startPowerHold()" ontouchend="endPowerHold()"></div>
 
-        <!-- Flashlight Effect -->
-        <div id="flashlight-overlay" class="absolute inset-0 w-full h-full transition-opacity duration-300"></div>
+        <div id="screen-container">
+            <!-- Completely Off Screen (Black) -->
+            <div id="black-screen" class="absolute inset-0 hidden"></div>
 
-        <!-- Dynamic Island / Notch -->
-        <div id="notch-container">
-            <div id="notch-content">
-                <i class="fas fa-lock text-green-500" id="notch-icon"></i>
-                <span id="notch-text">Unlocked</span>
-            </div>
-        </div>
-
-        <!-- Status Bar -->
-        <div id="status-bar" onclick="toggleQuickSettings()">
-            <span id="clock-time">12:00</span>
-            <div class="flex gap-2 items-center">
-                <i class="fas fa-signal text-xs"></i>
-                <i class="fas fa-wifi text-xs"></i>
-                <div class="flex items-center gap-1">
-                    <span id="battery-level" class="text-xs">100%</span>
-                    <i class="fas fa-battery-full text-xs" id="battery-icon"></i>
-                </div>
-            </div>
-        </div>
-
-        <div id="screen" class="relative">
-            <!-- Home Screen Wallpaper -->
-            <div id="wallpaper-layer" class="bg-default-home"></div>
-
-            <!-- Lock Screen -->
-            <div id="lock-screen" class="absolute inset-0 z-40 flex flex-col items-center justify-between py-20 text-white transition-transform duration-500">
-                <!-- Lock Screen Wallpaper -->
-                <div id="lock-wallpaper-layer" class="bg-default-lock absolute inset-0 z-[-1]"></div>
-                <!-- Blur overlay for legibility if needed -->
-                <div class="absolute inset-0 bg-black/20 z-[-1]"></div>
-
-                <!-- Increased margin top (mt-16) to avoid notch overlap -->
-                <div class="flex flex-col items-center mt-16 z-10">
-                    <i class="fas fa-lock mb-4 opacity-80" id="lock-padlock"></i>
-                    <div id="lock-time" class="text-8xl font-bold tracking-tighter drop-shadow-lg">12:00</div>
-                    <div id="lock-date" class="text-xl font-medium mt-2 drop-shadow-md">Monday, January 1</div>
-                </div>
-                
-                <div class="flex justify-between w-full px-12 mb-8 z-10">
-                    <button class="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition">
-                        <i class="fas fa-flashlight"></i>
-                    </button>
-                    <button class="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition" onclick="openApp('camera')">
-                        <i class="fas fa-camera"></i>
-                    </button>
-                </div>
-                
-                <div class="absolute bottom-10 w-full flex flex-col items-center z-10 cursor-pointer" onclick="attemptUnlock()">
-                    <div class="w-32 h-1 bg-white/50 rounded-full mb-2"></div>
-                    <span class="text-xs font-medium opacity-80">Swipe up to open</span>
-                </div>
-            </div>
-
-            <!-- Home Screen Content -->
-            <div id="home-screen" class="h-full pt-12 pb-8 flex flex-col relative z-10">
-                <!-- App Grid -->
-                <div class="app-grid">
-                    <div onclick="openApp('phone')" class="flex flex-col items-center gap-2 group">
-                        <div class="app-icon bg-green-500"><i class="fas fa-phone"></i></div>
-                        <span class="text-white text-[11px] font-medium drop-shadow-lg">Phone</span>
-                    </div>
-                    <div onclick="openApp('messages')" class="flex flex-col items-center gap-2">
-                        <div class="app-icon bg-green-400"><i class="fas fa-comment text-white"></i></div>
-                        <span class="text-white text-[11px] font-medium drop-shadow-lg">Messages</span>
-                    </div>
-                    <div onclick="openApp('browser')" class="flex flex-col items-center gap-2">
-                        <div class="app-icon bg-gradient-to-b from-blue-400 to-blue-600"><i class="fab fa-safari"></i></div>
-                        <span class="text-white text-[11px] font-medium drop-shadow-lg">Safari</span>
-                    </div>
-                    <div onclick="openApp('camera')" class="flex flex-col items-center gap-2">
-                        <div class="app-icon bg-gray-300 text-gray-800"><i class="fas fa-camera text-2xl"></i></div>
-                        <span class="text-white text-[11px] font-medium drop-shadow-lg">Camera</span>
-                    </div>
-                    <div onclick="openApp('gallery')" class="flex flex-col items-center gap-2">
-                        <div class="app-icon bg-white text-transparent bg-clip-text bg-gradient-to-tr from-blue-400 to-pink-500"><i class="fas fa-photo-video text-pink-500"></i></div>
-                        <span class="text-white text-[11px] font-medium drop-shadow-lg">Photos</span>
-                    </div>
-                    <div onclick="openApp('clock')" class="flex flex-col items-center gap-2">
-                        <div class="app-icon bg-black text-white border border-gray-700 relative">
-                            <i class="far fa-clock"></i>
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <div class="w-20 h-20 border border-orange-500 rounded-full opacity-20 animate-pulse"></div>
-                            </div>
+            <!-- Slide to Power Off UI -->
+            <div id="power-off-ui" class="absolute inset-0 hidden flex flex-col justify-between py-20 items-center text-white">
+                <div class="flex flex-col items-center gap-6 w-full relative">
+                    <div style="width: 280px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 30px; position: relative; display: flex; align-items: center; padding: 4px;" id="power-slider">
+                        <div style="width: 52px; height: 52px; background: white; border-radius: 50%; position: absolute; left: 4px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10;" class="text-red-500 text-xl" id="power-knob">
+                            <i class="fas fa-power-off"></i>
                         </div>
-                        <span class="text-white text-[11px] font-medium drop-shadow-lg">Clock</span>
-                    </div>
-                    <div onclick="openApp('calculator')" class="flex flex-col items-center gap-2">
-                        <div class="app-icon bg-black text-white border border-gray-700"><i class="fas fa-calculator text-orange-500"></i></div>
-                        <span class="text-white text-[11px] font-medium drop-shadow-lg">Calc</span>
-                    </div>
-                    <div onclick="openApp('notes')" class="flex flex-col items-center gap-2">
-                        <div class="app-icon bg-yellow-400 border-t-[10px] border-white/20"><i class="fas fa-sticky-note text-white"></i></div>
-                        <span class="text-white text-[11px] font-medium drop-shadow-lg">Notes</span>
-                    </div>
-                    <div onclick="openApp('music')" class="flex flex-col items-center gap-2">
-                        <div class="app-icon bg-red-500"><i class="fab fa-apple text-white"></i></div>
-                        <span class="text-white text-[11px] font-medium drop-shadow-lg">Music</span>
-                    </div>
-                    <div onclick="openApp('settings')" class="flex flex-col items-center gap-2">
-                        <div class="app-icon bg-gray-500"><i class="fas fa-cog text-gray-200 animate-spin-slow" style="animation-duration: 10s;"></i></div>
-                        <span class="text-white text-[11px] font-medium drop-shadow-lg">Settings</span>
+                        <div style="width: 100%; text-align: center; color: rgba(255,255,255,0.8); font-size: 14px; font-weight: 500; pointer-events: none; padding-left: 20px;" class="slider-text">slide to power off</div>
                     </div>
                 </div>
                 
-                <!-- Dock -->
-                <div class="mt-auto mx-4 mb-2 p-3 bg-white/20 backdrop-blur-xl rounded-[35px] grid grid-cols-4 gap-4">
-                    <div onclick="openApp('phone')" class="app-icon bg-green-500 mx-auto w-[55px] h-[55px]"><i class="fas fa-phone"></i></div>
-                    <div onclick="openApp('browser')" class="app-icon bg-blue-500 mx-auto w-[55px] h-[55px]"><i class="fab fa-safari"></i></div>
-                    <div onclick="openApp('messages')" class="app-icon bg-green-400 mx-auto w-[55px] h-[55px]"><i class="fas fa-comment"></i></div>
-                    <div onclick="openApp('music')" class="app-icon bg-red-500 mx-auto w-[55px] h-[55px]"><i class="fas fa-music"></i></div>
+                <div class="flex flex-col items-center gap-4">
+                     <button class="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white" onclick="cancelPowerOff()">
+                         <i class="fas fa-times text-xl"></i>
+                     </button>
+                     <span class="text-sm font-medium">Cancel</span>
                 </div>
             </div>
 
-            <!-- iOS Style Control Center -->
-            <div id="quick-settings" class="absolute top-0 left-0 w-full h-full z-50 transform -translate-y-full transition-transform duration-300 pt-10 px-6 backdrop-blur-3xl bg-black/40">
-                <div class="grid grid-cols-2 gap-4 mt-8">
-                    <!-- Connectivity -->
-                    <div class="glass-dark rounded-2xl p-3 grid grid-cols-2 gap-2 h-36">
-                        <div class="flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-white/10 rounded-lg transition" onclick="toggleWifi(this)">
-                            <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white"><i class="fas fa-wifi text-sm"></i></div>
-                            <span class="text-white text-[10px]">Wi-Fi</span>
-                        </div>
-                        <div class="flex flex-col items-center justify-center gap-1">
-                            <div class="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center text-white"><i class="fas fa-plane text-sm"></i></div>
-                            <span class="text-white text-[10px]">AirMode</span>
-                        </div>
-                        <div class="flex flex-col items-center justify-center gap-1">
-                            <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white"><i class="fas fa-broadcast-tower text-sm"></i></div>
-                            <span class="text-white text-[10px]">Cellular</span>
-                        </div>
-                        <div class="flex flex-col items-center justify-center gap-1">
-                            <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white"><i class="fab fa-bluetooth-b text-sm"></i></div>
-                            <span class="text-white text-[10px]">BT</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Music Widget -->
-                    <div class="glass-dark rounded-2xl p-4 h-36 flex flex-col justify-between">
-                         <div class="flex items-center gap-2">
-                             <div class="w-8 h-8 bg-gray-600 rounded-md flex items-center justify-center"><i class="fas fa-music text-white/50"></i></div>
-                             <div class="text-white text-xs">Not Playing</div>
-                         </div>
-                         <div class="flex justify-between text-white text-xl px-2">
-                             <i class="fas fa-backward"></i>
-                             <i class="fas fa-play"></i>
-                             <i class="fas fa-forward"></i>
-                         </div>
-                    </div>
-                </div>
-
-                <!-- Sliders -->
-                <div class="grid grid-cols-2 gap-4 mt-4 h-36">
-                    <div class="glass-dark rounded-2xl relative overflow-hidden flex flex-col justify-end p-3">
-                        <div class="absolute bottom-0 left-0 w-full bg-white transition-all" style="height: 50%" id="bright-fill"></div>
-                        <i class="fas fa-sun text-gray-500 z-10 text-xl relative mix-blend-difference mb-2"></i>
-                        <input type="range" class="cc-slider" min="0" max="100" value="50" oninput="document.getElementById('bright-fill').style.height=this.value+'%'">
-                    </div>
-                    <div class="glass-dark rounded-2xl relative overflow-hidden flex flex-col justify-end p-3">
-                        <div class="absolute bottom-0 left-0 w-full bg-white transition-all" style="height: 70%" id="vol-fill"></div>
-                        <i class="fas fa-volume-up text-gray-500 z-10 text-xl relative mix-blend-difference mb-2"></i>
-                        <input type="range" class="cc-slider" min="0" max="100" value="70" oninput="document.getElementById('vol-fill').style.height=this.value+'%'">
-                    </div>
-                </div>
-
-                <!-- Toggles -->
-                <div class="grid grid-cols-4 gap-4 mt-4">
-                    <div class="aspect-square glass-dark rounded-2xl flex items-center justify-center text-2xl text-white cursor-pointer active:bg-white/20 transition" onclick="toggleFlashlight(this)">
-                        <i class="fas fa-flashlight"></i>
-                    </div>
-                    <div class="aspect-square glass-dark rounded-2xl flex items-center justify-center text-2xl text-white cursor-pointer active:bg-white/20 transition" onclick="toggleDarkMode()">
-                        <i class="fas fa-moon"></i>
-                    </div>
-                    <div class="aspect-square glass-dark rounded-2xl flex items-center justify-center text-2xl text-white cursor-pointer" onclick="openApp('calculator'); toggleQuickSettings()">
-                        <i class="fas fa-calculator"></i>
-                    </div>
-                    <div class="aspect-square glass-dark rounded-2xl flex items-center justify-center text-2xl text-white cursor-pointer" onclick="openApp('camera'); toggleQuickSettings()">
-                        <i class="fas fa-camera"></i>
-                    </div>
-                </div>
-
-                <div class="absolute bottom-4 w-full left-0 text-center" onclick="toggleQuickSettings()">
-                     <i class="fas fa-chevron-up text-white/50 animate-bounce"></i>
+            <!-- Boot Screen -->
+            <div id="boot-screen" class="absolute inset-0 bg-black flex flex-col items-center justify-center text-white transition-opacity duration-1000">
+                <div id="boot-logo" class="text-3xl font-bold tracking-[0.2em] opacity-0 transition-opacity duration-1000">KANDAMAS</div>
+                <div id="boot-hello" class="text-5xl font-cursive opacity-0 absolute transition-opacity duration-1000 flex flex-col items-center gap-2">
+                    <span>Hello</span>
+                    <span class="text-2xl font-sans tracking-widest font-light">Kandamas</span>
                 </div>
             </div>
 
-            <!-- APPS -->
-            
-            <!-- Settings App (Updated for Custom Wallpapers) -->
-            <div id="app-settings" class="app-window hide bg-gray-50 flex flex-col">
-                <div class="p-4 bg-white shadow-sm font-bold text-xl mb-4 sticky top-0 z-10 flex items-center gap-2">
-                    <button onclick="goHome()" class="text-blue-500 font-normal text-base"><i class="fas fa-chevron-left"></i> Back</button>
-                    <span class="flex-1 text-center pr-12">Settings</span>
+            <!-- Flashlight Effect -->
+            <div id="flashlight-overlay" class="absolute inset-0 w-full h-full transition-opacity duration-300"></div>
+
+            <!-- Full Screen Photo Viewer -->
+            <div id="photo-viewer" onclick="closePhotoViewer()">
+                <img id="viewer-img" src="" alt="">
+            </div>
+
+            <!-- Dynamic Island / Notch -->
+            <div id="notch-container">
+                <div id="notch-content">
+                    <i class="fas fa-lock text-green-500" id="notch-icon"></i>
+                    <span id="notch-text">Unlocked</span>
                 </div>
-                <div class="px-4 space-y-4 overflow-y-auto pb-4">
-                    
-                    <div class="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
-                        <div class="w-16 h-16 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-2xl font-light">JD</div>
-                        <div>
-                            <div class="font-bold text-lg">John Doe</div>
-                            <div class="text-xs text-gray-500">Apple ID, iCloud, Media & Purchases</div>
-                        </div>
-                    </div>
+            </div>
 
-                    <!-- Wallpapers Section -->
-                    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                        <div class="p-3 border-b text-gray-500 text-xs font-bold uppercase tracking-wider bg-gray-50">Wallpapers</div>
-                        
-                        <!-- Lock Screen Upload -->
-                        <div class="p-4 border-b">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="font-medium">Lock Screen</span>
-                                <label class="text-blue-500 text-sm cursor-pointer hover:underline">
-                                    Change photo
-                                    <input type="file" accept="image/*" hidden onchange="handleWallpaperUpload(event, 'lock')">
-                                </label>
-                            </div>
-                            <div class="h-24 w-1/3 bg-gray-200 rounded-lg overflow-hidden relative border">
-                                <div id="preview-lock" class="absolute inset-0 bg-cover bg-center bg-default-lock"></div>
-                            </div>
-                        </div>
-
-                        <!-- Home Screen Upload -->
-                        <div class="p-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="font-medium">Home Screen</span>
-                                <label class="text-blue-500 text-sm cursor-pointer hover:underline">
-                                    Change photo
-                                    <input type="file" accept="image/*" hidden onchange="handleWallpaperUpload(event, 'home')">
-                                </label>
-                            </div>
-                            <div class="h-24 w-1/3 bg-gray-200 rounded-lg overflow-hidden relative border">
-                                <div id="preview-home" class="absolute inset-0 bg-cover bg-center bg-default-home"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                         <div class="p-4 border-b flex justify-between items-center cursor-pointer" onclick="toggleDarkMode()">
-                            <div class="flex items-center gap-3">
-                                <div class="w-7 h-7 rounded bg-black flex items-center justify-center text-white text-xs"><i class="fas fa-moon"></i></div>
-                                <span>Dark Mode</span>
-                            </div>
-                            <div class="w-12 h-7 bg-gray-200 rounded-full relative p-1 transition-colors" id="dm-toggle">
-                                <div class="w-5 h-5 bg-white rounded-full shadow-md transition-transform" id="dm-knob"></div>
-                            </div>
-                        </div>
+            <!-- Status Bar -->
+            <div id="status-bar" onclick="toggleQuickSettings()">
+                <span id="clock-time">12:00</span>
+                <div class="flex gap-2 items-center">
+                    <i class="fas fa-signal text-xs"></i>
+                    <i class="fas fa-wifi text-xs"></i>
+                    <div class="flex items-center gap-1">
+                        <span id="battery-level" class="text-xs">100%</span>
+                        <i class="fas fa-battery-full text-xs" id="battery-icon"></i>
                     </div>
                 </div>
             </div>
 
-            <!-- Calculator App (iOS Style) -->
-            <div id="app-calculator" class="app-window hide bg-black flex flex-col">
-                <div class="flex-1 p-6 flex items-end justify-end">
-                    <div id="calc-display" class="text-7xl text-white font-light break-all text-right">0</div>
-                </div>
-                <div class="grid grid-cols-4 gap-3 p-4 pb-12">
-                    <button class="calc-btn bg-gray-400 text-black" onclick="clearCalc()">AC</button>
-                    <button class="calc-btn bg-gray-400 text-black" onclick="calcOp('+/-')">+/-</button>
-                    <button class="calc-btn bg-gray-400 text-black" onclick="calcOp('%')">%</button>
-                    <button class="calc-btn bg-orange-500 text-white" onclick="calcOp('/')">÷</button>
-                    
-                    <button class="calc-btn bg-[#333] text-white" onclick="calcNum(7)">7</button>
-                    <button class="calc-btn bg-[#333] text-white" onclick="calcNum(8)">8</button>
-                    <button class="calc-btn bg-[#333] text-white" onclick="calcNum(9)">9</button>
-                    <button class="calc-btn bg-orange-500 text-white" onclick="calcOp('*')">×</button>
-                    
-                    <button class="calc-btn bg-[#333] text-white" onclick="calcNum(4)">4</button>
-                    <button class="calc-btn bg-[#333] text-white" onclick="calcNum(5)">5</button>
-                    <button class="calc-btn bg-[#333] text-white" onclick="calcNum(6)">6</button>
-                    <button class="calc-btn bg-orange-500 text-white" onclick="calcOp('-')">-</button>
-                    
-                    <button class="calc-btn bg-[#333] text-white" onclick="calcNum(1)">1</button>
-                    <button class="calc-btn bg-[#333] text-white" onclick="calcNum(2)">2</button>
-                    <button class="calc-btn bg-[#333] text-white" onclick="calcNum(3)">3</button>
-                    <button class="calc-btn bg-orange-500 text-white" onclick="calcOp('+')">+</button>
-                    
-                    <button class="calc-btn bg-[#333] text-white col-span-2 w-auto rounded-[35px] pl-8 justify-start" onclick="calcNum(0)">0</button>
-                    <button class="calc-btn bg-[#333] text-white" onclick="calcNum('.')">.</button>
-                    <button class="calc-btn bg-orange-500 text-white" onclick="calcResult()">=</button>
-                </div>
-            </div>
+            <div id="screen" class="relative">
+                <!-- Home Screen Wallpaper -->
+                <div id="wallpaper-layer" class="bg-default-home"></div>
 
-            <!-- Other Apps (Phone, Browser, Camera etc kept simpler for brevity but styled) -->
-             <div id="app-phone" class="app-window hide flex flex-col bg-white">
-                <div class="flex-1 flex flex-col justify-end pb-12 px-8">
-                    <div id="phone-display" class="text-4xl text-center mb-8 h-12 font-medium text-gray-800 tracking-wider"></div>
-                    <div class="grid grid-cols-3 gap-y-6 gap-x-6 mb-8 place-items-center">
-                        <button class="calc-btn bg-gray-100 text-black text-2xl font-bold hover:bg-gray-200" onclick="dial('1')">1</button>
-                        <button class="calc-btn bg-gray-100 text-black text-2xl font-bold hover:bg-gray-200" onclick="dial('2')">2</button>
-                        <button class="calc-btn bg-gray-100 text-black text-2xl font-bold hover:bg-gray-200" onclick="dial('3')">3</button>
-                        <button class="calc-btn bg-gray-100 text-black text-2xl font-bold hover:bg-gray-200" onclick="dial('4')">4</button>
-                        <button class="calc-btn bg-gray-100 text-black text-2xl font-bold hover:bg-gray-200" onclick="dial('5')">5</button>
-                        <button class="calc-btn bg-gray-100 text-black text-2xl font-bold hover:bg-gray-200" onclick="dial('6')">6</button>
-                        <button class="calc-btn bg-gray-100 text-black text-2xl font-bold hover:bg-gray-200" onclick="dial('7')">7</button>
-                        <button class="calc-btn bg-gray-100 text-black text-2xl font-bold hover:bg-gray-200" onclick="dial('8')">8</button>
-                        <button class="calc-btn bg-gray-100 text-black text-2xl font-bold hover:bg-gray-200" onclick="dial('9')">9</button>
-                        <button class="calc-btn bg-gray-100 text-black text-xl font-bold hover:bg-gray-200" onclick="dial('*')">*</button>
-                        <button class="calc-btn bg-gray-100 text-black text-2xl font-bold hover:bg-gray-200" onclick="dial('0')">0</button>
-                        <button class="calc-btn bg-gray-100 text-black text-xl font-bold hover:bg-gray-200" onclick="dial('#')">#</button>
+                <!-- Lock Screen (Swipe Logic Attached Here) -->
+                <div id="lock-screen" class="absolute inset-0 z-40 flex flex-col items-center justify-between py-20 text-white transition-transform duration-300">
+                    <div id="lock-wallpaper-layer" class="bg-default-lock absolute inset-0 z-[-1]"></div>
+                    <div class="absolute inset-0 bg-black/20 z-[-1]"></div>
+
+                    <div class="flex flex-col items-center mt-16 z-10 transition-opacity duration-300" id="lock-info">
+                        <i class="fas fa-lock mb-4 opacity-80" id="lock-padlock"></i>
+                        <div id="lock-time" class="text-8xl font-bold tracking-tighter drop-shadow-lg">12:00</div>
+                        <div id="lock-date" class="text-xl font-medium mt-2 drop-shadow-md">Monday, January 1</div>
                     </div>
-                    <div class="flex justify-center items-center gap-8 mt-2">
-                        <button class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center text-white text-2xl shadow-lg active:opacity-80 transition" onclick="makeCall()">
-                            <i class="fas fa-phone"></i>
+                    
+                    <div class="flex justify-between w-full px-12 mb-8 z-10 transition-opacity duration-300" id="lock-actions">
+                        <button class="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition">
+                            <i class="fas fa-flashlight"></i>
+                        </button>
+                        <button class="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition" onclick="openApp('camera')">
+                            <i class="fas fa-camera"></i>
                         </button>
                     </div>
+                    
+                    <!-- Swipe Area -->
+                    <div id="lock-handle-area" class="flex justify-center items-end pb-4 cursor-grab active:cursor-grabbing">
+                        <div class="w-32 h-1 bg-white/50 rounded-full mb-2"></div>
+                    </div>
                 </div>
+
+                <!-- Home Screen Content -->
+                <div id="home-screen" class="h-full pt-12 pb-8 flex flex-col relative z-10">
+                    <div class="app-grid">
+                        <div onclick="openApp('phone')" class="flex flex-col items-center gap-2 group">
+                            <div class="app-icon bg-green-500"><i class="fas fa-phone"></i></div>
+                            <span class="text-white text-[11px] font-medium drop-shadow-lg">Phone</span>
+                        </div>
+                        <div onclick="openApp('messages')" class="flex flex-col items-center gap-2">
+                            <div class="app-icon bg-green-400"><i class="fas fa-comment text-white"></i></div>
+                            <span class="text-white text-[11px] font-medium drop-shadow-lg">Messages</span>
+                        </div>
+                        <div onclick="openApp('browser')" class="flex flex-col items-center gap-2">
+                            <div class="app-icon bg-gradient-to-b from-blue-400 to-blue-600"><i class="fab fa-safari"></i></div>
+                            <span class="text-white text-[11px] font-medium drop-shadow-lg">Safari</span>
+                        </div>
+                        <div onclick="openApp('camera')" class="flex flex-col items-center gap-2">
+                            <div class="app-icon bg-gray-300 text-gray-800"><i class="fas fa-camera text-2xl"></i></div>
+                            <span class="text-white text-[11px] font-medium drop-shadow-lg">Camera</span>
+                        </div>
+                        <div onclick="openApp('gallery')" class="flex flex-col items-center gap-2">
+                            <div class="app-icon bg-white text-transparent bg-clip-text bg-gradient-to-tr from-blue-400 to-pink-500"><i class="fas fa-photo-video text-pink-500"></i></div>
+                            <span class="text-white text-[11px] font-medium drop-shadow-lg">Photos</span>
+                        </div>
+                        <div onclick="openApp('clock')" class="flex flex-col items-center gap-2">
+                            <div class="app-icon bg-black text-white border border-gray-700 relative">
+                                <i class="far fa-clock"></i>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <div class="w-20 h-20 border border-orange-500 rounded-full opacity-20 animate-pulse"></div>
+                                </div>
+                            </div>
+                            <span class="text-white text-[11px] font-medium drop-shadow-lg">Clock</span>
+                        </div>
+                        <div onclick="openApp('calculator')" class="flex flex-col items-center gap-2">
+                            <div class="app-icon bg-black text-white border border-gray-700"><i class="fas fa-calculator text-orange-500"></i></div>
+                            <span class="text-white text-[11px] font-medium drop-shadow-lg">Calc</span>
+                        </div>
+                        <div onclick="openApp('notes')" class="flex flex-col items-center gap-2">
+                            <div class="app-icon bg-yellow-400 border-t-[10px] border-white/20"><i class="fas fa-sticky-note text-white"></i></div>
+                            <span class="text-white text-[11px] font-medium drop-shadow-lg">Notes</span>
+                        </div>
+                        <div onclick="openApp('music')" class="flex flex-col items-center gap-2">
+                            <div class="app-icon bg-red-500"><i class="fab fa-apple text-white"></i></div>
+                            <span class="text-white text-[11px] font-medium drop-shadow-lg">Music</span>
+                        </div>
+                        <div onclick="openApp('settings')" class="flex flex-col items-center gap-2">
+                            <div class="app-icon bg-gray-500"><i class="fas fa-cog text-gray-200 animate-spin-slow" style="animation-duration: 10s;"></i></div>
+                            <span class="text-white text-[11px] font-medium drop-shadow-lg">Settings</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Dock -->
+                    <div class="mt-auto mx-4 mb-2 p-3 bg-white/20 backdrop-blur-xl rounded-[35px] grid grid-cols-4 gap-4">
+                        <div onclick="openApp('phone')" class="app-icon bg-green-500 mx-auto w-[55px] h-[55px]"><i class="fas fa-phone"></i></div>
+                        <div onclick="openApp('browser')" class="app-icon bg-blue-500 mx-auto w-[55px] h-[55px]"><i class="fab fa-safari"></i></div>
+                        <div onclick="openApp('messages')" class="app-icon bg-green-400 mx-auto w-[55px] h-[55px]"><i class="fas fa-comment"></i></div>
+                        <div onclick="openApp('music')" class="app-icon bg-red-500 mx-auto w-[55px] h-[55px]"><i class="fas fa-music"></i></div>
+                    </div>
+                </div>
+
+                <!-- Control Center -->
+                <div id="quick-settings" class="absolute top-0 left-0 w-full h-full z-50 transform -translate-y-full transition-transform duration-300 pt-10 px-6 backdrop-blur-3xl bg-black/40">
+                    <div class="grid grid-cols-2 gap-4 mt-8">
+                        <div class="glass-dark rounded-2xl p-3 grid grid-cols-2 gap-2 h-36">
+                            <div class="flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-white/10 rounded-lg transition" onclick="toggleWifi(this)">
+                                <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white"><i class="fas fa-wifi text-sm"></i></div>
+                                <span class="text-white text-[10px]">Wi-Fi</span>
+                            </div>
+                            <div class="flex flex-col items-center justify-center gap-1">
+                                <div class="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center text-white"><i class="fas fa-plane text-sm"></i></div>
+                                <span class="text-white text-[10px]">AirMode</span>
+                            </div>
+                            <div class="flex flex-col items-center justify-center gap-1">
+                                <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white"><i class="fas fa-broadcast-tower text-sm"></i></div>
+                                <span class="text-white text-[10px]">Cellular</span>
+                            </div>
+                            <div class="flex flex-col items-center justify-center gap-1">
+                                <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white"><i class="fab fa-bluetooth-b text-sm"></i></div>
+                                <span class="text-white text-[10px]">BT</span>
+                            </div>
+                        </div>
+                        <div class="glass-dark rounded-2xl p-4 h-36 flex flex-col justify-between">
+                             <div class="flex items-center gap-2">
+                                 <div class="w-8 h-8 bg-gray-600 rounded-md flex items-center justify-center"><i class="fas fa-music text-white/50"></i></div>
+                                 <div class="text-white text-xs">Not Playing</div>
+                             </div>
+                             <div class="flex justify-between text-white text-xl px-2">
+                                 <i class="fas fa-backward"></i>
+                                 <i class="fas fa-play"></i>
+                                 <i class="fas fa-forward"></i>
+                             </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mt-4 h-36">
+                        <div class="glass-dark rounded-2xl relative overflow-hidden flex flex-col justify-end p-3">
+                            <div class="absolute bottom-0 left-0 w-full bg-white transition-all" style="height: 50%" id="bright-fill"></div>
+                            <i class="fas fa-sun text-gray-500 z-10 text-xl relative mix-blend-difference mb-2"></i>
+                            <input type="range" class="cc-slider" min="0" max="100" value="50" oninput="document.getElementById('bright-fill').style.height=this.value+'%'">
+                        </div>
+                        <div class="glass-dark rounded-2xl relative overflow-hidden flex flex-col justify-end p-3">
+                            <div class="absolute bottom-0 left-0 w-full bg-white transition-all" style="height: 70%" id="vol-fill"></div>
+                            <i class="fas fa-volume-up text-gray-500 z-10 text-xl relative mix-blend-difference mb-2"></i>
+                            <input type="range" class="cc-slider" min="0" max="100" value="70" oninput="document.getElementById('vol-fill').style.height=this.value+'%'">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-4 gap-4 mt-4">
+                        <div class="aspect-square glass-dark rounded-2xl flex items-center justify-center text-2xl text-white cursor-pointer active:bg-white/20 transition" onclick="toggleFlashlight(this)">
+                            <i class="fas fa-flashlight"></i>
+                        </div>
+                        <div class="aspect-square glass-dark rounded-2xl flex items-center justify-center text-2xl text-white cursor-pointer active:bg-white/20 transition" onclick="toggleDarkMode()">
+                            <i class="fas fa-moon"></i>
+                        </div>
+                        <div class="aspect-square glass-dark rounded-2xl flex items-center justify-center text-2xl text-white cursor-pointer" onclick="openApp('calculator'); toggleQuickSettings()">
+                            <i class="fas fa-calculator"></i>
+                        </div>
+                        <div class="aspect-square glass-dark rounded-2xl flex items-center justify-center text-2xl text-white cursor-pointer" onclick="openApp('camera'); toggleQuickSettings()">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-4 w-full left-0 text-center" onclick="toggleQuickSettings()">
+                         <i class="fas fa-chevron-up text-white/50 animate-bounce"></i>
+                    </div>
+                </div>
+
+                <!-- APPS -->
+                <!-- Settings App -->
+                <div id="app-settings" class="app-window hide bg-gray-50 flex flex-col">
+                    <div class="p-4 bg-white shadow-sm font-bold text-xl mb-4 sticky top-0 z-10 flex items-center gap-2 pt-12">
+                        <button onclick="goHome()" class="text-blue-500 font-normal text-base"><i class="fas fa-chevron-left"></i> Back</button>
+                        <span class="flex-1 text-center pr-12">Settings</span>
+                    </div>
+                    <div class="px-4 space-y-4 overflow-y-auto pb-4">
+                        <div class="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
+                            <div class="w-16 h-16 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-2xl font-light">JD</div>
+                            <div>
+                                <div class="font-bold text-lg">John Doe</div>
+                                <div class="text-xs text-gray-500">Apple ID, iCloud, Media & Purchases</div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                            <div class="p-3 border-b text-gray-500 text-xs font-bold uppercase tracking-wider bg-gray-50">Wallpapers</div>
+                            <div class="p-4 border-b">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="font-medium">Lock Screen</span>
+                                    <label class="text-blue-500 text-sm cursor-pointer hover:underline">
+                                        Change photo
+                                        <input type="file" accept="image/*" hidden onchange="handleWallpaperUpload(event, 'lock')">
+                                    </label>
+                                </div>
+                                <div class="h-24 w-1/3 bg-gray-200 rounded-lg overflow-hidden relative border">
+                                    <div id="preview-lock" class="absolute inset-0 bg-cover bg-center bg-default-lock"></div>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="font-medium">Home Screen</span>
+                                    <label class="text-blue-500 text-sm cursor-pointer hover:underline">
+                                        Change photo
+                                        <input type="file" accept="image/*" hidden onchange="handleWallpaperUpload(event, 'home')">
+                                    </label>
+                                </div>
+                                <div class="h-24 w-1/3 bg-gray-200 rounded-lg overflow-hidden relative border">
+                                    <div id="preview-home" class="absolute inset-0 bg-cover bg-center bg-default-home"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                             <div class="p-4 border-b flex justify-between items-center cursor-pointer" onclick="toggleDarkMode()">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-7 h-7 rounded bg-black flex items-center justify-center text-white text-xs"><i class="fas fa-moon"></i></div>
+                                    <span>Dark Mode</span>
+                                </div>
+                                <div class="w-12 h-7 bg-gray-200 rounded-full relative p-1 transition-colors" id="dm-toggle">
+                                    <div class="w-5 h-5 bg-white rounded-full shadow-md transition-transform" id="dm-knob"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calculator App -->
+                <div id="app-calculator" class="app-window hide bg-black flex flex-col">
+                    <div class="flex-1 p-6 flex items-end justify-end">
+                        <div id="calc-display" class="text-7xl text-white font-light break-all text-right">0</div>
+                    </div>
+                    <div class="grid grid-cols-4 gap-3 p-4 pb-12">
+                        <button class="calc-btn bg-gray-400 text-black" onclick="clearCalc()">AC</button>
+                        <button class="calc-btn bg-gray-400 text-black" onclick="calcOp('+/-')">+/-</button>
+                        <button class="calc-btn bg-gray-400 text-black" onclick="calcOp('%')">%</button>
+                        <button class="calc-btn bg-orange-500 text-white" onclick="calcOp('/')">÷</button>
+                        <button class="calc-btn bg-[#333] text-white" onclick="calcNum(7)">7</button>
+                        <button class="calc-btn bg-[#333] text-white" onclick="calcNum(8)">8</button>
+                        <button class="calc-btn bg-[#333] text-white" onclick="calcNum(9)">9</button>
+                        <button class="calc-btn bg-orange-500 text-white" onclick="calcOp('*')">×</button>
+                        <button class="calc-btn bg-[#333] text-white" onclick="calcNum(4)">4</button>
+                        <button class="calc-btn bg-[#333] text-white" onclick="calcNum(5)">5</button>
+                        <button class="calc-btn bg-[#333] text-white" onclick="calcNum(6)">6</button>
+                        <button class="calc-btn bg-orange-500 text-white" onclick="calcOp('-')">-</button>
+                        <button class="calc-btn bg-[#333] text-white" onclick="calcNum(1)">1</button>
+                        <button class="calc-btn bg-[#333] text-white" onclick="calcNum(2)">2</button>
+                        <button class="calc-btn bg-[#333] text-white" onclick="calcNum(3)">3</button>
+                        <button class="calc-btn bg-orange-500 text-white" onclick="calcOp('+')">+</button>
+                        <button class="calc-btn bg-[#333] text-white col-span-2 w-auto rounded-[35px] pl-8 justify-start" onclick="calcNum(0)">0</button>
+                        <button class="calc-btn bg-[#333] text-white" onclick="calcNum('.')">.</button>
+                        <button class="calc-btn bg-orange-500 text-white" onclick="calcResult()">=</button>
+                    </div>
+                </div>
+
+                <!-- Phone App -->
+                 <div id="app-phone" class="app-window hide flex flex-col bg-white">
+                    <div class="flex-1 flex flex-col justify-end pb-12 px-8">
+                        <div id="phone-display" class="text-4xl text-center mb-8 h-12 font-medium text-gray-800 tracking-wider"></div>
+                        <div class="grid grid-cols-3 gap-y-6 gap-x-6 mb-8 place-items-center">
+                            <button class="calc-btn bg-gray-100 text-black text-2xl font-bold hover:bg-gray-200" onclick="dial('1')">1</button>
+                            <button class="calc-btn bg-gray-100 text-black text-2xl font-bold hover:bg-gray-200" onclick="dial('2')">2</button>
+                            <button class="calc-btn bg-gray-100 text-black text-2xl font-bold hover:bg-gray-200" onclick="dial('3')">3</button>
+                            <button class="calc-btn bg-gray-100 text-black text-2xl font-bold hover:bg-gray-200" onclick="dial('4')">4</button>
+                            <button class="calc-btn bg-gray-100 text-black text-2xl font-bold hover:bg-gray-200" onclick="dial('5')">5</button>
+                            <button class="calc-btn bg-gray-100 text-black text-2xl font-bold hover:bg-gray-200" onclick="dial('6')">6</button>
+                            <button class="calc-btn bg-gray-100 text-black text-2xl font-bold hover:bg-gray-200" onclick="dial('7')">7</button>
+                            <button class="calc-btn bg-gray-100 text-black text-2xl font-bold hover:bg-gray-200" onclick="dial('8')">8</button>
+                            <button class="calc-btn bg-gray-100 text-black text-2xl font-bold hover:bg-gray-200" onclick="dial('9')">9</button>
+                            <button class="calc-btn bg-gray-100 text-black text-xl font-bold hover:bg-gray-200" onclick="dial('*')">*</button>
+                            <button class="calc-btn bg-gray-100 text-black text-2xl font-bold hover:bg-gray-200" onclick="dial('0')">0</button>
+                            <button class="calc-btn bg-gray-100 text-black text-xl font-bold hover:bg-gray-200" onclick="dial('#')">#</button>
+                        </div>
+                        <div class="flex justify-center items-center gap-8 mt-2">
+                            <button class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center text-white text-2xl shadow-lg active:opacity-80 transition" onclick="makeCall()">
+                                <i class="fas fa-phone"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Camera App -->
+                <div id="app-camera" class="app-window hide bg-black flex flex-col">
+                    <div class="flex-1 relative bg-black rounded-3xl overflow-hidden m-2 mt-8">
+                        <video id="camera-feed" class="absolute inset-0 w-full h-full object-cover transform scale-x-[-1]" autoplay playsinline></video>
+                    </div>
+                    <div class="h-28 flex items-center justify-between px-8 pb-4">
+                        <div class="w-12 h-12 bg-gray-800 rounded-lg overflow-hidden border border-gray-600 cursor-pointer" onclick="openApp('gallery')">
+                             <img id="cam-preview-img" class="w-full h-full object-cover opacity-80" src="">
+                        </div>
+                        <button class="w-20 h-20 rounded-full border-4 border-white p-1" onclick="takePhoto()">
+                            <div class="w-full h-full bg-white rounded-full active:scale-90 transition-transform"></div>
+                        </button>
+                        <div class="w-12 h-12 flex items-center justify-center text-white text-xl bg-gray-800/50 rounded-full"><i class="fas fa-sync"></i></div>
+                    </div>
+                </div>
+
+                <!-- Photos/Gallery App (Refined) -->
+                <div id="app-gallery" class="app-window hide bg-white flex flex-col">
+                    <div class="h-24 pt-12 px-4 bg-white sticky top-0 z-10 flex justify-between items-end pb-2 border-b">
+                        <span class="font-bold text-3xl tracking-tight">Photos</span>
+                        <span class="text-blue-500 text-lg font-normal mb-1">Select</span>
+                    </div>
+                    <div id="gallery-grid" class="grid grid-cols-3 gap-0.5 mt-0 pb-20 overflow-y-auto">
+                        <!-- Photos injected here -->
+                    </div>
+                    <!-- Bottom Tab Bar -->
+                    <div class="absolute bottom-0 w-full h-16 bg-white/90 border-t flex justify-around items-center text-gray-400 backdrop-blur-lg">
+                         <div class="flex flex-col items-center gap-1 text-blue-500">
+                             <i class="fas fa-photo-video text-xl"></i>
+                             <span class="text-[10px] font-medium">Library</span>
+                         </div>
+                         <div class="flex flex-col items-center gap-1">
+                             <i class="fas fa-heart text-xl"></i>
+                             <span class="text-[10px] font-medium">For You</span>
+                         </div>
+                         <div class="flex flex-col items-center gap-1">
+                             <i class="fas fa-layer-group text-xl"></i>
+                             <span class="text-[10px] font-medium">Albums</span>
+                         </div>
+                         <div class="flex flex-col items-center gap-1">
+                             <i class="fas fa-search text-xl"></i>
+                             <span class="text-[10px] font-medium">Search</span>
+                         </div>
+                    </div>
+                </div>
+
+                <!-- Other Apps -->
+                <div id="app-messages" class="app-window hide bg-white flex flex-col"><div class="p-4 border-b font-bold pt-12">Messages</div><div class="flex-1 flex items-center justify-center text-gray-400">No Messages</div></div>
+                <div id="app-browser" class="app-window hide bg-white flex flex-col"><div class="p-2 border-b bg-gray-100 flex gap-2 pt-12"><input class="flex-1 rounded px-2" value="apple.com"><button onclick="loadUrl()">Go</button></div><div id="browser-content" class="flex-1 p-4"></div></div>
+                <div id="app-notes" class="app-window hide bg-yellow-50 flex flex-col"><div class="pt-12 p-4 border-b font-bold bg-yellow-100">Notes</div><textarea id="note-area" class="flex-1 bg-transparent p-4 outline-none" placeholder="New Note"></textarea></div>
+                <div id="app-music" class="app-window hide bg-gradient-to-b from-gray-900 to-black text-white p-8 flex flex-col justify-end"><h1 class="text-3xl font-bold mb-2">Music</h1><p class="text-gray-400 mb-8">Library</p><div class="h-1 bg-gray-800 rounded mb-8"><div class="h-full w-0 bg-white"></div></div><div class="flex justify-center text-4xl"><i class="fas fa-play"></i></div></div>
+                <div id="app-clock" class="app-window hide bg-black text-white flex flex-col items-center justify-center"><div id="stopwatch-display" class="text-6xl font-mono">00:00</div></div>
+
             </div>
 
-            <!-- Keep Messages, Browser, Camera, Gallery, Notes, Clock, Music apps as is but ensure class updates for Dark Mode -->
-            <!-- Placeholder for app structure to work -->
-            <div id="app-messages" class="app-window hide bg-white flex flex-col"><div class="p-4 border-b font-bold">Messages</div><div class="flex-1 flex items-center justify-center text-gray-400">No Messages</div></div>
-            <div id="app-browser" class="app-window hide bg-white flex flex-col"><div class="p-2 border-b bg-gray-100 flex gap-2"><input class="flex-1 rounded px-2" value="apple.com"><button onclick="loadUrl()">Go</button></div><div id="browser-content" class="flex-1 p-4"></div></div>
-            <div id="app-camera" class="app-window hide bg-black flex flex-col"><video id="camera-feed" class="flex-1 object-cover" autoplay></video><div class="h-24 flex items-center justify-center gap-8"><button class="w-16 h-16 rounded-full border-4 border-white" onclick="takePhoto()"></button></div></div>
-            <div id="app-gallery" class="app-window hide bg-white flex flex-col"><div class="p-4 font-bold">Photos</div><div id="gallery-grid" class="grid grid-cols-3 gap-1 p-1"></div></div>
-            <div id="app-notes" class="app-window hide bg-yellow-50 flex flex-col"><textarea id="note-area" class="flex-1 bg-transparent p-4 outline-none" placeholder="New Note"></textarea></div>
-            <div id="app-music" class="app-window hide bg-gradient-to-b from-gray-900 to-black text-white p-8 flex flex-col justify-end"><h1 class="text-3xl font-bold mb-2">Music</h1><p class="text-gray-400 mb-8">Library</p><div class="h-1 bg-gray-800 rounded mb-8"><div class="h-full w-0 bg-white"></div></div><div class="flex justify-center text-4xl"><i class="fas fa-play"></i></div></div>
-            <div id="app-clock" class="app-window hide bg-black text-white flex flex-col items-center justify-center"><div id="stopwatch-display" class="text-6xl font-mono">00:00</div></div>
-
+            <!-- Nav Bar (Home Indicator) -->
+            <div id="nav-bar" onclick="goHome()"></div>
         </div>
-
-        <!-- Nav Bar (Home Indicator) -->
-        <div id="nav-bar" onclick="goHome()"></div>
     </div>
 
     <!-- JavaScript Logic -->
@@ -596,59 +689,38 @@
         // System State
         let currentApp = null;
         let isLocked = true;
+        let isOff = false;
         let battery = 100;
-        let isDarkMode = false;
-        
-        // --- Initialization ---
+        let powerTimer = null;
+        let photos = [];
+
+        // --- Clock ---
         function updateTime() {
+            if(isOff) return;
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const timeStr = `${hours}:${minutes}`;
-            
             document.getElementById('clock-time').innerText = timeStr;
             document.getElementById('lock-time').innerText = timeStr;
-            
             const options = { weekday: 'long', month: 'long', day: 'numeric' };
             document.getElementById('lock-date').innerText = now.toLocaleDateString('en-US', options);
         }
         setInterval(updateTime, 1000);
-        updateTime();
 
-        // --- Boot Sequence ---
+        // --- Boot & Init ---
         window.addEventListener('load', () => {
-            const bootScreen = document.getElementById('boot-screen');
-            const logo = document.getElementById('boot-logo');
-            const hello = document.getElementById('boot-hello');
+            const savedPhotos = localStorage.getItem('droidos-photos');
+            if (savedPhotos) photos = JSON.parse(savedPhotos);
+            else photos = [
+                'https://images.unsplash.com/photo-1543852786-1cf6624b9987?q=80&w=600&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=600&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1494253109108-2e30c049369b?q=80&w=600&auto=format&fit=crop'
+            ];
+            updateGalleryUI();
 
-            // 1. Show Text Logo
-            setTimeout(() => {
-                logo.style.opacity = '1';
-                
-                // 2. Hide Logo, Show Hello
-                setTimeout(() => {
-                    logo.style.opacity = '0';
-                    setTimeout(() => {
-                        hello.style.opacity = '1';
-                        
-                        // 3. Hide Hello, Reveal OS
-                        setTimeout(() => {
-                            hello.style.opacity = '0';
-                            setTimeout(() => {
-                                bootScreen.style.opacity = '0';
-                                setTimeout(() => {
-                                    bootScreen.style.display = 'none';
-                                }, 1000);
-                            }, 1000);
-                        }, 2500); // Duration of "Hello"
-                    }, 1000);
-                }, 2000); // Duration of Logo
-            }, 500);
-            
-            // Wallpapers check
             const savedLock = localStorage.getItem('droidos-lock-wp');
             const savedHome = localStorage.getItem('droidos-home-wp');
-            
             if(savedLock) {
                 document.getElementById('lock-wallpaper-layer').style.backgroundImage = `url('${savedLock}')`;
                 document.getElementById('preview-lock').style.backgroundImage = `url('${savedLock}')`;
@@ -657,7 +729,107 @@
                 document.getElementById('wallpaper-layer').style.backgroundImage = `url('${savedHome}')`;
                 document.getElementById('preview-home').style.backgroundImage = `url('${savedHome}')`;
             }
+
+            startBootSequence();
+            initSwipeUnlock();
         });
+
+        function startBootSequence() {
+            const bootScreen = document.getElementById('boot-screen');
+            const logo = document.getElementById('boot-logo');
+            const hello = document.getElementById('boot-hello');
+            const blackScreen = document.getElementById('black-screen');
+            
+            blackScreen.classList.add('hide');
+            bootScreen.style.display = 'flex';
+            bootScreen.style.opacity = '1';
+            
+            setTimeout(() => { logo.style.opacity = '1'; }, 500);
+            setTimeout(() => { logo.style.opacity = '0'; }, 2000);
+            setTimeout(() => { hello.style.opacity = '1'; }, 3000);
+            setTimeout(() => { hello.style.opacity = '0'; }, 4500);
+            setTimeout(() => { 
+                bootScreen.style.opacity = '0';
+                setTimeout(() => { 
+                    bootScreen.style.display = 'none'; 
+                    isOff = false;
+                    isLocked = true;
+                    // Reset lock screen
+                    const lockScreen = document.getElementById('lock-screen');
+                    lockScreen.style.transform = 'translateY(0)';
+                    lockScreen.style.opacity = '1';
+                    lockScreen.classList.remove('slide-down-out');
+                    document.getElementById('lock-info').style.opacity = '1';
+                    document.getElementById('lock-actions').style.opacity = '1';
+                }, 1000);
+            }, 5500);
+        }
+
+        // --- Swipe to Unlock Logic ---
+        function initSwipeUnlock() {
+            const lockScreen = document.getElementById('lock-screen');
+            const handleArea = document.getElementById('lock-handle-area');
+            let startY = 0;
+            let currentY = 0;
+            let isDragging = false;
+
+            function onStart(e) {
+                if(!isLocked) return;
+                startY = e.touches ? e.touches[0].clientY : e.clientY;
+                isDragging = true;
+                lockScreen.style.transition = 'none'; // Disable transition for drag
+            }
+
+            function onMove(e) {
+                if(!isDragging || !isLocked) return;
+                const y = e.touches ? e.touches[0].clientY : e.clientY;
+                const deltaY = y - startY;
+
+                // Only allow upward drag (negative delta)
+                if (deltaY < 0) {
+                    currentY = deltaY;
+                    lockScreen.style.transform = `translateY(${currentY}px)`;
+                    // Fade out content
+                    const opacity = 1 - (Math.abs(currentY) / 300);
+                    document.getElementById('lock-info').style.opacity = Math.max(0, opacity);
+                    document.getElementById('lock-actions').style.opacity = Math.max(0, opacity);
+                }
+            }
+
+            function onEnd(e) {
+                if(!isDragging) return;
+                isDragging = false;
+                lockScreen.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+
+                // Threshold to unlock (e.g., -150px)
+                if (currentY < -150) {
+                    unlockPhone();
+                } else {
+                    // Reset
+                    lockScreen.style.transform = 'translateY(0)';
+                    document.getElementById('lock-info').style.opacity = '1';
+                    document.getElementById('lock-actions').style.opacity = '1';
+                }
+                currentY = 0;
+            }
+
+            // Bind to Lock Screen, not just handle, for better UX
+            lockScreen.addEventListener('mousedown', onStart);
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onEnd);
+            
+            lockScreen.addEventListener('touchstart', onStart);
+            document.addEventListener('touchmove', onMove);
+            document.addEventListener('touchend', onEnd);
+        }
+
+        function unlockPhone() {
+            const lockScreen = document.getElementById('lock-screen');
+            lockScreen.style.transform = 'translateY(-100%)'; // Slide completely up
+            lockScreen.style.opacity = '0';
+            isLocked = false;
+            triggerNotch('unlock');
+        }
 
         // --- Notch Logic ---
         function triggerNotch(type) {
@@ -667,23 +839,17 @@
             const text = document.getElementById('notch-text');
             
             content.style.opacity = '0';
-            
             setTimeout(() => {
                 if(type === 'unlock') {
-                    notch.className = 'notch-face-id';
+                    // notch.className = 'notch-face-id'; // Removed resizing for cleaner "swipe" feel
                     icon.className = 'fas fa-lock-open text-green-500';
-                    text.innerText = 'Face ID';
+                    text.innerText = 'Unlocked';
                 } else if (type === 'charging') {
                     notch.className = 'notch-charging';
                     icon.className = 'fas fa-bolt text-yellow-400';
                     text.innerText = battery + '% Charged';
                 }
-
-                setTimeout(() => {
-                    content.style.opacity = '1';
-                }, 200);
-
-                // Reset
+                setTimeout(() => { content.style.opacity = '1'; }, 200);
                 setTimeout(() => {
                     content.style.opacity = '0';
                     setTimeout(() => {
@@ -695,32 +861,89 @@
             }, 100);
         }
 
-        // --- Navigation ---
-        function attemptUnlock() {
-            triggerNotch('unlock');
-            setTimeout(() => {
-                document.getElementById('lock-padlock').className = "fas fa-lock-open mb-4 opacity-80";
-                setTimeout(() => {
-                    document.getElementById('lock-screen').classList.add('slide-down-out');
-                    isLocked = false;
-                }, 500);
-            }, 800);
+        // --- Power & Sleep ---
+        function startPowerHold() {
+            if(isOff) return;
+            powerTimer = setTimeout(() => { showPowerOffUI(); }, 800);
+        }
+        function endPowerHold() {
+            clearTimeout(powerTimer);
+            if(isOff) { startBootSequence(); } 
+            else if(document.getElementById('power-off-ui').classList.contains('hidden')) { toggleSleep(); }
+        }
+        function toggleSleep() {
+            const black = document.getElementById('black-screen');
+            if(black.classList.contains('hidden')) {
+                black.classList.remove('hidden'); // Sleep
+            } else {
+                black.classList.add('hidden'); // Wake
+                // If waking up, show lock screen
+                if(!isLocked) {
+                    // Ideally reset to lock screen, but for simple UX keep state
+                }
+            }
+        }
+        function showPowerOffUI() {
+            document.getElementById('power-off-ui').classList.remove('hidden');
+            initPowerSlider();
+        }
+        function cancelPowerOff() {
+            document.getElementById('power-off-ui').classList.add('hidden');
+        }
+        function initPowerSlider() {
+            const slider = document.getElementById('power-slider');
+            const knob = document.getElementById('power-knob');
+            let isDragging = false, startX, currentX;
+            const maxDrag = 220; 
+
+            function handleStart(e) { isDragging = true; startX = e.touches ? e.touches[0].clientX : e.clientX; }
+            function handleMove(e) {
+                if (!isDragging) return;
+                const x = e.touches ? e.touches[0].clientX : e.clientX;
+                const diff = x - startX;
+                currentX = Math.max(0, Math.min(diff, maxDrag));
+                knob.style.transform = `translateX(${currentX}px)`;
+                slider.querySelector('.slider-text').style.opacity = 1 - (currentX / maxDrag);
+            }
+            function handleEnd() {
+                if (!isDragging) return;
+                isDragging = false;
+                if (currentX > maxDrag * 0.85) { turnOffDevice(); } 
+                else {
+                    knob.style.transition = 'transform 0.3s';
+                    knob.style.transform = 'translateX(0)';
+                    slider.querySelector('.slider-text').style.opacity = '1';
+                    setTimeout(() => { knob.style.transition = 'none'; }, 300);
+                }
+            }
+            knob.onmousedown = handleStart; document.onmousemove = handleMove; document.onmouseup = handleEnd;
+            knob.ontouchstart = handleStart; document.ontouchmove = handleMove; document.ontouchend = handleEnd;
+        }
+        function turnOffDevice() {
+            isOff = true;
+            document.getElementById('power-off-ui').classList.add('hidden');
+            document.getElementById('black-screen').classList.remove('hidden');
+            document.getElementById('power-knob').style.transform = 'translateX(0)';
+            document.querySelector('.slider-text').style.opacity = '1';
         }
 
+        // --- Apps & Navigation ---
         function openApp(appId) {
             if (isLocked) return;
             const app = document.getElementById(`app-${appId}`);
             if (app) {
                 if(appId === 'camera') startCamera();
+                else stopCamera();
+                
                 app.classList.remove('hide');
                 app.classList.add('pop-in');
                 currentApp = app;
                 document.getElementById('quick-settings').style.transform = "translateY(-100%)";
             }
         }
-
         function goHome() {
             if (currentApp) {
+                stopCamera();
                 currentApp.style.transform = 'scale(0.8)';
                 currentApp.style.opacity = '0';
                 setTimeout(() => {
@@ -731,7 +954,6 @@
                 }, 200);
             }
         }
-
         function toggleQuickSettings() {
             if(isLocked) return;
             const qs = document.getElementById('quick-settings');
@@ -739,70 +961,71 @@
             qs.style.transform = isOpen ? "translateY(-100%)" : "translateY(0%)";
         }
 
-        // --- Custom Wallpapers ---
-        function handleWallpaperUpload(event, type) {
-            const file = event.target.files[0];
-            if(file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const imgUrl = `url('${e.target.result}')`;
-                    
-                    if(type === 'lock') {
-                        document.getElementById('lock-wallpaper-layer').style.backgroundImage = imgUrl;
-                        document.getElementById('preview-lock').style.backgroundImage = imgUrl;
-                        localStorage.setItem('droidos-lock-wp', e.target.result); // Save to local storage
-                    } else {
-                        document.getElementById('wallpaper-layer').style.backgroundImage = imgUrl;
-                        document.getElementById('preview-home').style.backgroundImage = imgUrl;
-                        localStorage.setItem('droidos-home-wp', e.target.result);
-                    }
-                };
-                reader.readAsDataURL(file);
+        // --- Camera & Photos ---
+        let videoStream = null;
+        async function startCamera() {
+            try {
+                const video = document.getElementById('camera-feed');
+                videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = videoStream;
+            } catch(e) { console.log(e); document.getElementById('camera-feed').style.background = "#333"; }
+        }
+        function stopCamera() {
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+                document.getElementById('camera-feed').srcObject = null;
             }
+        }
+        function takePhoto() {
+             const video = document.getElementById('camera-feed');
+             const flash = document.createElement('div');
+             flash.className = 'absolute inset-0 bg-white z-50 transition-opacity duration-200';
+             document.getElementById('app-camera').appendChild(flash);
+             setTimeout(() => flash.style.opacity = '0', 50);
+             setTimeout(() => flash.remove(), 250);
+
+             if (video.srcObject) {
+                 const canvas = document.createElement('canvas');
+                 canvas.width = video.videoWidth || 640;
+                 canvas.height = video.videoHeight || 480;
+                 const ctx = canvas.getContext('2d');
+                 ctx.translate(canvas.width, 0); ctx.scale(-1, 1);
+                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                 
+                 const dataUrl = canvas.toDataURL('image/png');
+                 photos.unshift(dataUrl);
+                 localStorage.setItem('droidos-photos', JSON.stringify(photos));
+                 
+                 updateGalleryUI();
+                 document.getElementById('cam-preview-img').src = dataUrl;
+             }
+        }
+        function updateGalleryUI() {
+            const grid = document.getElementById('gallery-grid');
+            grid.innerHTML = "";
+            photos.forEach(src => {
+                const div = document.createElement('div');
+                div.className = "aspect-square bg-gray-200 overflow-hidden relative group cursor-pointer";
+                const img = document.createElement('img');
+                img.src = src;
+                img.className = "w-full h-full object-cover";
+                div.onclick = () => viewPhoto(src); // Click to open
+                div.appendChild(img);
+                grid.appendChild(div);
+            });
+        }
+        function viewPhoto(src) {
+            const viewer = document.getElementById('photo-viewer');
+            const img = document.getElementById('viewer-img');
+            img.src = src;
+            viewer.classList.add('active');
+        }
+        function closePhotoViewer() {
+            document.getElementById('photo-viewer').classList.remove('active');
         }
 
-        // --- Features ---
-        function toggleFlashlight(el) {
-            const overlay = document.getElementById('flashlight-overlay');
-            if(overlay.style.opacity === '1') {
-                overlay.style.opacity = '0';
-                el.classList.remove('bg-white', 'text-black');
-                el.classList.add('glass-dark', 'text-white');
-            } else {
-                overlay.style.opacity = '1';
-                el.classList.remove('glass-dark', 'text-white');
-                el.classList.add('bg-white', 'text-black');
-            }
-        }
-
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            const toggle = document.getElementById('dm-toggle');
-            const knob = document.getElementById('dm-knob');
-            
-            isDarkMode = !isDarkMode;
-            if(isDarkMode) {
-                toggle.classList.remove('bg-gray-200');
-                toggle.classList.add('bg-green-500');
-                knob.classList.add('translate-x-5');
-            } else {
-                toggle.classList.add('bg-gray-200');
-                toggle.classList.remove('bg-green-500');
-                knob.classList.remove('translate-x-5');
-            }
-        }
-        
-        function toggleWifi(el) {
-            const div = el.querySelector('div');
-            if(div.classList.contains('bg-blue-500')) {
-                div.classList.remove('bg-blue-500'); div.classList.add('bg-gray-600');
-            } else {
-                div.classList.add('bg-blue-500'); div.classList.remove('bg-gray-600');
-            }
-        }
-
-        // --- App Logics (Simplified for brevity but functional) ---
-        // Calculator
+        // --- Utils (Calc, Phone, WP) ---
         let calcVal = "0";
         function calcNum(n) {
             if(calcVal === "0") calcVal = String(n); else calcVal += n;
@@ -816,29 +1039,78 @@
             try { calcVal = String(eval(calcVal)); } catch { calcVal = "Error"; }
             document.getElementById('calc-display').innerText = calcVal;
         }
-        
-        // Camera
-        async function startCamera() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                document.getElementById('camera-feed').srcObject = stream;
-            } catch(e) { console.log("Cam error"); }
-        }
-        function takePhoto() {
-             const flash = document.createElement('div');
-             flash.className = 'absolute inset-0 bg-white z-50 animate-pulse';
-             document.getElementById('app-camera').appendChild(flash);
-             setTimeout(() => flash.remove(), 200);
-             // Add logic to save photo to array if needed
-        }
-        
-        // Phone
-        function dial(n) {
-             const display = document.getElementById('phone-display');
-             display.innerText += n;
-        }
+        function dial(n) { document.getElementById('phone-display').innerText += n; }
         function makeCall() { alert("Calling " + document.getElementById('phone-display').innerText); }
+        function handleWallpaperUpload(event, type) {
+            const file = event.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imgUrl = `url('${e.target.result}')`;
+                    if(type === 'lock') {
+                        document.getElementById('lock-wallpaper-layer').style.backgroundImage = imgUrl;
+                        document.getElementById('preview-lock').style.backgroundImage = imgUrl;
+                        localStorage.setItem('droidos-lock-wp', e.target.result); 
+                    } else {
+                        document.getElementById('wallpaper-layer').style.backgroundImage = imgUrl;
+                        document.getElementById('preview-home').style.backgroundImage = imgUrl;
+                        localStorage.setItem('droidos-home-wp', e.target.result);
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        function toggleFlashlight(el) {
+            const overlay = document.getElementById('flashlight-overlay');
+            if(overlay.style.opacity === '1') {
+                overlay.style.opacity = '0';
+                el.classList.remove('bg-white', 'text-black');
+                el.classList.add('glass-dark', 'text-white');
+            } else {
+                overlay.style.opacity = '1';
+                el.classList.remove('glass-dark', 'text-white');
+                el.classList.add('bg-white', 'text-black');
+            }
+        }
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+        function toggleWifi(el) {
+            const div = el.querySelector('div');
+            if(div.classList.contains('bg-blue-500')) {
+                div.classList.remove('bg-blue-500'); div.classList.add('bg-gray-600');
+            } else {
+                div.classList.add('bg-blue-500'); div.classList.remove('bg-gray-600');
+            }
+        }
 
+        // --- Global Swipe Back for Apps ---
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        // Attach listeners to the screen container to capture swipes over apps
+        const screenContainer = document.getElementById('screen-container');
+
+        screenContainer.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].clientX;
+            touchStartY = e.changedTouches[0].clientY;
+        }, {passive: true});
+
+        screenContainer.addEventListener('touchend', e => {
+            if(!currentApp || isLocked) return; // Only if an app is open and phone unlocked
+
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            
+            const diffX = touchEndX - touchStartX;
+            const diffY = touchEndY - touchStartY;
+
+            // Horizontal Swipe Detection (Left or Right)
+            // Threshold of 60px, and horizontal movement must be dominant
+            if(Math.abs(diffX) > 60 && Math.abs(diffX) > Math.abs(diffY)) {
+                goHome();
+            }
+        }, {passive: true});
     </script>
 </body>
 </html>
