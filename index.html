@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1083,34 +1084,6 @@
                 div.classList.add('bg-blue-500'); div.classList.remove('bg-gray-600');
             }
         }
-
-        // --- Global Swipe Back for Apps ---
-        let touchStartX = 0;
-        let touchStartY = 0;
-
-        // Attach listeners to the screen container to capture swipes over apps
-        const screenContainer = document.getElementById('screen-container');
-
-        screenContainer.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].clientX;
-            touchStartY = e.changedTouches[0].clientY;
-        }, {passive: true});
-
-        screenContainer.addEventListener('touchend', e => {
-            if(!currentApp || isLocked) return; // Only if an app is open and phone unlocked
-
-            const touchEndX = e.changedTouches[0].clientX;
-            const touchEndY = e.changedTouches[0].clientY;
-            
-            const diffX = touchEndX - touchStartX;
-            const diffY = touchEndY - touchStartY;
-
-            // Horizontal Swipe Detection (Left or Right)
-            // Threshold of 60px, and horizontal movement must be dominant
-            if(Math.abs(diffX) > 60 && Math.abs(diffX) > Math.abs(diffY)) {
-                goHome();
-            }
-        }, {passive: true});
     </script>
 </body>
 </html>
